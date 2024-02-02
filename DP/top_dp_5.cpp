@@ -47,6 +47,7 @@ int main() {
 	return 0;
 }
 
+//
 //강사풀이
 //C++ (Top-Down)
 #include<iostream>
@@ -56,13 +57,15 @@ int h, w;
 int map[100][100];
 int memo[100][100];
 
+
 int getMaxPoint(int dy, int dx)
 {
 	if (dx < 0 || dx >= w) return -21e8;
 	if (dy == h) return 0;
-	if (memo[dy][dx] != 0) return memo[dy][dx];
-	if (map[dy][dx] == 0) return -21e8;
+	if (memo[dy][dx] != 0) return memo[dy][dx]; //나는 이거 크기 비교 했는데 이렇게 하면 바로 가능
+	if (map[dy][dx] == 0) return -21e8; // 벽인 경우
 
+	//이렇게 하면 내방식에서 큐에 넣을때 visited사용할 필요 없이 할 수 있음 - 기능(시간)은 거의 비숫함 
 	int a = getMaxPoint(dy + 1, dx - 1);
 	int b = getMaxPoint(dy + 1, dx);
 	int c = getMaxPoint(dy + 1, dx + 1);
@@ -71,8 +74,9 @@ int getMaxPoint(int dy, int dx)
 	if (ret < b) ret = b;
 	if (ret < c) ret = c;
 
+	//지금위치의 최대값(DP값) = 아래로 갈수 있는 모든 곳중 가장 큰값 + 지금 위치값
 	memo[dy][dx] = ret + map[dy][dx];
-	return memo[dy][dx];
+	return memo[dy][dx]; //이게 답
 }
 
 int main()
@@ -87,7 +91,7 @@ int main()
 	}
 
 	int ret = getMaxPoint(0, 0);
-	cout << ret;
+	cout << ret; // 마지막줄에서 최대구한느거 왜안함 왜냐하면 0,0넣었을때 리턴되는건 0,0의 값, 즉 1개만 리턴됨 그것도 제일큰
 
 	return 0;
 }
@@ -107,23 +111,29 @@ int main() {
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
 			cin >> MAP[i][j];
-			dp[i][j] = MIN; 
+			dp[i][j] = MIN; //max값구할때 0이면 -인거 구분못하므로 초기화
 		}
 	}
 	dp[0][0] = MAP[0][0]; 
 	for (int i = 1; i < height; i++) {
 		for (int j = 0; j < width; j++) {
-			if (MAP[i][j] == 0)
+			if (MAP[i][j] == 0) // 벽인 경우 
 				continue;
-			if(j-1 < 0)
+			// 이건 내방식처럼 내 DP값을 전(next)값부터 채우는 형식(next값을 전값으로채우는)  
+			if(j-1 < 0) 
 				dp[i][j] = max(dp[i - 1][j] + MAP[i][j], dp[i - 1][j + 1] + MAP[i][j]);
 			else if (j + 1 >= width)
 				dp[i][j] = max(dp[i - 1][j] + MAP[i][j], dp[i - 1][j - 1] + MAP[i][j]);
+			//위 2경우는 왼쪽 벽, 오른쪽 벽이므로 경우의 수가 (아래,아래오른쪽),(아래,아래왼쪽) 인 경우이므로 따로 구분함
+			// 위 처럼 하면 arr[i][j] < 0 ,arr[i][j](nextcol) > n 은 경우를 방지할 수 있음
+			// row는 정해져 있는 특별한 경우라서 고려하지 않음 
+				
+			// 아래는 벽이 아닌 중간지점들이라 (아래왼쪽,아래,아래오른쪽)3가지 경우 고려함
 			else
 				dp[i][j] = max(max(dp[i - 1][j] + MAP[i][j], dp[i - 1][j - 1] + MAP[i][j]), dp[i - 1][j + 1] + MAP[i][j]);
 		}
 	}
-
+	//이건 재귀가 아니므로 내 코드 처럼 마지막거 일일이 검사해서 최대값 찾음
 	int ans = -21e8; 
 	for (int i = 0; i < width; i++) {
 		ans = max(ans, dp[height - 1][i]);
