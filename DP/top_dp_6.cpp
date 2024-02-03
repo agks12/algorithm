@@ -10,7 +10,7 @@ int dc[4] = { 0,0,-1,1 };
 int dp(int nowrow, int nowcol) {
 	
 	if (nowrow == n - 1 && nowcol == n - 1)return arr[n-1][n-1];
-	if (nowrow < 0 || nowcol < 0 || nowrow >= n || nowcol >= n)return 1e9;
+	if (nowrow < 0 || nowcol < 0 || nowrow >= n || nowcol >= n)return 1e9; //아래 왼쪽이라 0인경우 필요없음
 	if (DP[nowrow][nowcol] != 0)return DP[nowrow][nowcol];
 
 	int b = dp(nowrow + dr[1], nowcol + dc[1]);
@@ -30,32 +30,25 @@ int main() {
 	}
 
 	dp(0, 0);
+	cout << DP[0][0] << "\n";
 
-	int nowrow = 0;
-	int nowcol = 0;
 	for (int i = 0; i <= n; i++) {
 		DP[n][i] = 1e9;
 		DP[i][n] = 1e9;
 	}
 
-	cout << DP[0][0] << "\n0,0\n";
-	for (int i = 0; i < (2 * n - 2); i++) {
+	int nowrow = 0;
+	int nowcol = 0;
+	while(true){
+		cout << nowrow << "," << nowcol << "\n";
+		if (nowrow == n - 1 && nowcol == n - 1)break;
 		int a = DP[nowrow + 1][nowcol];
-		int b = DP[nowrow][nowcol+1];
-		if (a < b) {
-			nowrow += 1;
-			cout << nowrow << "," << nowcol << "\n";
-		}
-		else{
-			nowcol += 1;
-			cout << nowrow << "," << nowcol << "\n";
-		}
+		int b = DP[nowrow][nowcol + 1];
+		if (a < b) nowrow += 1;
+		else nowcol += 1;
 	}
-
-	int k = 0;
 	return 0;
 }
-
 
 //C++ (Top-Down)
 #include<iostream>
