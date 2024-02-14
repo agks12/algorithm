@@ -2,6 +2,9 @@ extern bool checkCards(int mIndexA, int mIndexB, int mDiff);
 #include<iostream>
 #include<vector>
 
+
+
+
 using namespace std;
 int visited[50001];
 vector<int> v[50001];
