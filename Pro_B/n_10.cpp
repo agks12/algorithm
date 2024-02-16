@@ -1,56 +1,36 @@
 extern bool checkCards(int mIndexA, int mIndexB, int mDiff);
 #include<iostream>
+#include<cstring>
 #include<vector>
 
-
-
-
 using namespace std;
-int visited[50001];
 vector<int> v[50001];
-int preN;
 void playGame(int N)
 {
-    memset(visited, 0, sizeof(visited));
-    for (int i = 0; i <= N; i++) {
-        v[i].clear();
-    }
-    //int Ncnt = 0;
-    //for (int i = 1; i < N; i++) { // 차이가 N까지 남 차이 1인거 위아래2개씩 4개 최대최소를 기준으로 잡으면 2개
-    //    int cnt = 0;
-    //    if (Ncnt >= (2 * N)-1)break;
-    //    for (int j = 1; j < 2 * N; j++) { //
-    //        if (i !=1 && cnt >= 4)break;
-    //        if (!checkCards(0, j, i)) continue;
-    //        if (visited[j] == 1)continue;
-    //        cnt++;
-    //        Ncnt++;
-    //        visited[j] = 1;
-    //        v[i].push_back(j);
-    //    }
-    //}
-    //int stop = 0;
-    //for (int i = 1; i < 2 * N; i++) {
-    //    if(!checkCards(0, i, 0))continue;
-    //    checkCards(0, i, 0);
-    //    stop = i;
-    //    break;
-    //}
+    for (int i = 0; i <= N; i++) v[i].clear();
 
+    //모든 인덱스 차이값검사 
     for (int i = 1; i < 2*N; i++) {
-        for (int j = 0; j < N; j++) {
-            if (!checkCards(0, i, j)) continue;
-            if (visited[j] >= 4)continue;
-            visited[j]++;
-            v[j].push_back(i);
-            break;
+        int ret = 0;
+        int left = 0;
+        int right = N;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (checkCards(0, i, mid)) {//차이가 차이가 mid 보다 작거나 같으면 여기 들감
+                right = mid - 1;
+            }
+            else {
+                left = mid + 1;//차이가 mid 보다 크면 여기 들감
+                ret = left;
+            }
         }
+        v[ret].push_back(i);
     }
+
     checkCards(0, v[0][0], 0); //0번인덱스거 찾기
 
     //v[1] 부터 짝맞추기
     for (int i = 1; i < N; i++) {
-        if (v[i].size() == 0)break;
         if (v[i].size() == 2) {
             checkCards(v[i][0], v[i][1], 0);
             continue;
@@ -64,9 +44,4 @@ void playGame(int N)
             break;
         }
     }
-
-    // 두 카드의 숫자를 비교하기 위해 아래와 같이 checkCards 함수를 사용합니다.
-    // <영문>
-    //
-    // checkCards(mIndexA, mIndexB, mDiff);
 }
