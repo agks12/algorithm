@@ -34,8 +34,8 @@ AtoE nextArea(int nowNode, int nowdir) {
 		//우
 		nextStRow = stRow;
 		nextEndRow = endRow;
-		nextStCol = endCol+1;
-		nextEndCol = endCol+1;
+		nextStCol = endCol + 1;
+		nextEndCol = endCol + 1;
 	}
 	else if (nowdir == 2) {
 		//하
@@ -51,7 +51,7 @@ AtoE nextArea(int nowNode, int nowdir) {
 		nextStCol = stCol - 1;
 		nextEndCol = stCol - 1;
 	}
-	
+
 	return { nextStRow ,nextEndRow ,nextStCol,nextEndCol };
 }
 
@@ -102,7 +102,7 @@ vector<rangeNode> bfs(int nowNode, int nowdir) {
 		int BoolBlock = testBlock(Area, now, nowdir);
 		if (BoolBlock == -1) {
 			vector<rangeNode> v2;
-			v2.push_back({-1,-100});
+			v2.push_back({ -1,-100 });
 			return v2;
 		}
 
@@ -112,7 +112,7 @@ vector<rangeNode> bfs(int nowNode, int nowdir) {
 			v2.push_back({ -1,-100 });
 			return v2;
 		}
-		v.push_back({ now,testRange});//범위 초과면 -1 아니면 1
+		v.push_back({ now,testRange });//범위 초과면 -1 아니면 1
 
 
 		//벽 없으면 다음 기사 찾기
@@ -120,7 +120,7 @@ vector<rangeNode> bfs(int nowNode, int nowdir) {
 		int endRow = Area.endrow;
 		int stCol = Area.stcol;
 		int endCol = Area.endcol;
-		
+
 		int visited[32] = { 0 };
 		if (stRow == endRow) {
 			//row줄 검사 - col 만 바꿔 가면서
@@ -171,6 +171,38 @@ int findDamege(AtoE Area) {
 	return hole;
 }
 
+
+int findDamege2(AtoE Area, int nowdir) {
+	int stRow = Area.strow + dr[nowdir];
+	int endRow = Area.endrow + dr[nowdir];
+	int stCol = Area.stcol + dc[nowdir];
+	int endCol = Area.endcol + dc[nowdir];
+
+	int hole = 0;
+
+	for (int i = stRow; i <= endRow; i++) {
+		for (int j = stCol; j <= endCol; j++) {
+			if (OriginArr[i][j] == 1)hole++;
+		}
+	}
+
+	//if (stRow == endRow) {
+	//	//row줄 검사 - col 만 바꿔 가면서
+	//	for (int i = stCol; i <= endCol; i++) {
+	//		if (OriginArr[stRow][i] == 1)hole++;
+	//	}
+	//}
+	//else if (stCol == endCol) {
+	//	//row줄 검사 - col 만 바꿔 가면서
+	//	for (int i = stRow; i <= endRow; i++) {
+	//		if (OriginArr[i][stCol] == 1)hole++;
+	//	}
+	//}
+
+	return hole;
+}
+
+
 void reset(int nowNode) {
 	int stRow = gisa[nowNode].strow;
 	int endRow = gisa[nowNode].endrow;
@@ -198,11 +230,11 @@ void move(int nowNode, int nowdir, int turn) {
 
 	//데미지 계산
 	AtoE Area = nextArea(nowNode, nowdir);
-	int hole = findDamege(Area);
-	if(turn!=0)damege[nowNode] -= hole;
-	
+	int hole = findDamege2(gisa[nowNode], nowdir);
+	if (turn != 0)damege[nowNode] -= hole;
 
-	if (damege[nowNode] == 0) {
+
+	if (damege[nowNode] <= 0) {
 		//0으로 초기화
 		reset(nowNode);
 		return;
@@ -213,7 +245,7 @@ void move(int nowNode, int nowdir, int turn) {
 		//위 
 		for (int j = stCol; j <= endCol; j++) {
 			arr[endRow][j] = 0; // 제일 아래 가로줄 초기화
-			arr[endRow-1][j] = nowNode; // 옮길 줄 초기화
+			arr[endRow - 1][j] = nowNode; // 옮길 줄 초기화
 			arr[stRow - 1][j] = nowNode; // 옮길 위 줄 초기화
 			if (!(j == stCol || j == endCol))arr[stRow][j] = 0;
 		}
@@ -222,8 +254,8 @@ void move(int nowNode, int nowdir, int turn) {
 		//오른쪽
 		for (int j = stRow; j <= endRow; j++) {
 			arr[j][stCol] = 0; // 제일 아래 가로줄 초기화
-			arr[j][stCol+1] = nowNode; // 옮길 줄 초기화
-			arr[j][endCol+1] = nowNode; // 옮길 위 줄 초기화
+			arr[j][stCol + 1] = nowNode; // 옮길 줄 초기화
+			arr[j][endCol + 1] = nowNode; // 옮길 위 줄 초기화
 			if (!(j == stRow || j == endRow))arr[j][endCol] = 0;
 		}
 	}
@@ -240,7 +272,7 @@ void move(int nowNode, int nowdir, int turn) {
 		//왼쪽
 		for (int j = stRow; j <= endRow; j++) {
 			arr[j][endCol] = 0; // 제일 아래 가로줄 초기화
-			arr[j][endCol -1 ] = nowNode; // 옮길 줄 초기화
+			arr[j][endCol - 1] = nowNode; // 옮길 줄 초기화
 			arr[j][stCol - 1] = nowNode; // 옮길 위 줄 초기화
 			if (!(j == stRow || j == endRow))arr[j][stCol] = 0;
 		}
@@ -252,6 +284,8 @@ void move(int nowNode, int nowdir, int turn) {
 	stCol += dc[nowdir];
 	endCol += dc[nowdir];
 	gisa[nowNode] = { stRow ,endRow ,stCol ,endCol };
+
+
 }
 
 //void outmove(int nowNode, int nowdir) {
@@ -341,7 +375,7 @@ void move(int nowNode, int nowdir, int turn) {
 
 int main() {
 	cin >> N >> L >> Q;
-	
+
 	// 기본배열
 	for (int i = 1; i <= N; i++) {
 		for (int j = 1; j <= N; j++) {
@@ -353,7 +387,7 @@ int main() {
 	for (int i = 1; i <= L; i++) {
 		int r, c, h, w, k;
 		cin >> r >> c >> h >> w >> k;
-		
+
 		//좌상,우하 저장
 		gisa[i] = { r,r + h - 1,c,c + w - 1 };
 		damege[i] = k; // 손실점수
@@ -363,23 +397,23 @@ int main() {
 		// 세로줄 2개 초기화
 		for (int row = r; row <= r + h - 1; row++) {
 			arr[row][c] = i;
-			arr[row][c+w-1] = i;
+			arr[row][c + w - 1] = i;
 		}
 		//가로줄 2개 초기화
 		for (int col = c; col <= c + w - 1; col++) {
 			arr[r][col] = i;
-			arr[r+h-1][col] = i;
+			arr[r + h - 1][col] = i;
 		}
 	}
 
-	cout << "=======\n";
-	for (int i = 1; i <= N; i++) {
-		for (int j = 1; j <= N; j++) {
-			cout << arr[i][j] << " ";
-		}
-		cout << "\n";
-	}
-	cout << "=======\n";
+	//cout << "=======\n";
+	//for (int i = 1; i <= N; i++) {
+	//	for (int j = 1; j <= N; j++) {
+	//		cout << arr[i][j] << " ";
+	//	}
+	//	cout << "\n";
+	//}
+	//cout << "=======\n";
 
 
 	for (int i = 0; i < Q; i++) {
@@ -393,38 +427,38 @@ int main() {
 		if (test.nowNode == -1)continue;//벽있는 경우
 		else {
 			//마지막 부터 옮겨야 겠지?
-			for (int j = ans.size()-1; j >= 0; j--) {
+			for (int j = ans.size() - 1; j >= 0; j--) {
 				rangeNode now = ans[j];
 				int Node = now.nowNode;
 				int rangeTest = now.outBool; //-1이면 아웃범위 1 이면 그냥 옯기면 됨
 
-				if (rangeTest == 1)move(Node, nowdir,j);
+				if (rangeTest == 1)move(Node, nowdir, j);
 				//else if (rangeTest == -1)outmove2(Node, nowdir);
 			}
 		}
 
-		cout << "=======\n";
-		for (int i = 1; i <= N; i++) {
-			for (int j = 1; j <= N; j++) {
-				cout << arr[i][j] << " ";
-			}
-			cout << "   ";
-			for (int j = 1; j <= N; j++) {
-				cout << OriginArr[i][j] << " ";
-			}
-			cout << "\n";
-		}
-		cout << "=======\n";
-		for (int j = 1; j <= L; j++) {
-			cout <<"damege"<<j<<" " << damege[j] << " \n";
-		}
-		cout << "\n";
+		//cout << "=======\n";
+		//for (int i = 1; i <= N; i++) {
+		//	for (int j = 1; j <= N; j++) {
+		//		cout << arr[i][j] << " ";
+		//	}
+		//	cout << "   ";
+		//	for (int j = 1; j <= N; j++) {
+		//		cout << OriginArr[i][j] << " ";
+		//	}
+		//	cout << "\n";
+		//}
+		//cout << "=======\n";
+		//for (int j = 1; j <= L; j++) {
+		//	cout <<"damege"<<j<<" " << damege[j] << " \n";
+		//}
+		//cout << "\n";
 
 	}
-	
+
 	int sum = 0;
 	for (int i = 1; i <= L; i++) {
-		if (damege[i] == 0)continue;
+		if (damege[i] <= 0)continue;
 		int sumDamage = life[i] - damege[i];
 		sum += sumDamage;
 	}
@@ -433,48 +467,3 @@ int main() {
 
 	return 0;
 }
-
-
-
-
-
-//4 2 7
-//0 0 1 1
-//2 0 1 0
-//1 1 0 1
-//0 1 0 0
-//4 2 1 3 3
-//1 3 2 2 5
-//2 2
-//2 0
-//1 1
-//2 2
-//1 0
-//2 3
-//1 1
-
-
-//5 8 10
-//2 0 0 0 1
-//1 0 2 0 1
-//0 1 1 0 1
-//1 1 2 1 0
-//0 0 0 0 1
-//4 5 2 1 3
-//2 1 1 1 8
-//2 4 2 2 2
-//2 2 1 1 9
-//5 4 1 1 5
-//4 4 1 1 5
-//4 1 2 2 8
-//3 3 1 1 10
-//8 3
-//3 2
-//1 0
-//5 2
-//6 3
-//8 3
-//1 0
-//2 1
-//8 1
-//5 2
