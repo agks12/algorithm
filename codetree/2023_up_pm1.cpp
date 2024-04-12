@@ -85,53 +85,12 @@ void move() {
 
 vector<Pair> findClose() {
 	queue<Pair> q;
-	//queue<Pair> q2;
 	vector<Pair> v;
 	int flag = 0;
 	int flag2 = 0;
 	q.push(Exit);
-	//q2.push(Exit);
 	int visited[11][11] = { 0 };
-	//int visited2[11][11] = { 0 };
 	visited[Exit.row][Exit.col] = 1;
-
-	//while (!q2.empty()) {
-	//	Pair now = q2.front(); q2.pop();
-	//	for (int i = 0; i < 8; i++) {
-	//		int nextRow = now.row + dr[i];
-	//		int nextCol = now.col + dc[i];
-	//		if (nextRow<1 || nextRow > N || nextCol < 1 || nextCol>N)continue;
-	//		if (visited2[nextRow][nextCol] > 0)continue;
-	//		visited2[nextRow][nextCol] = 1;
-	//		q2.push({ nextRow,nextCol });
-
-	//	}
-	//}
-
-
-	//while (!q.empty()) {
-	//	// 퍼저나가는 n+1 값이 정사각형 크기
-	//	Pair now = q.front(); q.pop();
-	//	if (flag2 == 1 && flag <= visited[now.row][now.col]) {
-	//		return v;
-	//	}
-	//	for (int i = 0; i < 8; i++) {
-	//		int nextRow = now.row + dr8[i];
-	//		int nextCol = now.col + dc8[i];
-	//		if (nextRow<1 || nextRow > N || nextCol < 1 || nextCol>N)continue;
-	//		if (visited[nextRow][nextCol] > 0)continue;
-	//		if (vArr[nextRow][nextCol].TF == true) {
-	//			//그냥 좌표만 반환하면 정사각형 어캐 판단하냐 // 가까운 모든 거 찾아서 가장 작은거 구해야됨
-	//			v.push_back({nextRow,nextCol});
-	//			flag = visited[now.row][now.col] +1;
-	//			flag2 = 1;
-	//			visited[nextRow][nextCol] = visited[now.row][now.col] + 1;
-	//			continue;
-	//		}
-	//		visited[nextRow][nextCol] = visited[now.row][now.col] + 1;
-	//		q.push({ nextRow,nextCol });
-	//	}
-	//}
 
 	while (!q.empty()) {
 		// 퍼저나가는 n+1 값이 정사각형 크기
@@ -270,7 +229,6 @@ AtoE notCrossPair2(Pair findPair) {
 	int stCol = 0;
 	int endCol = 0;
 
-
 	if (nowRow == exitRow && nowCol < exitCol) {
 		//좌측
 		int testLength = exitCol - nowCol;
@@ -397,14 +355,20 @@ AtoE CrossPair(Pair findPair) {
 		int nextEndRow = endRow;//6
 		int nextStCol = 0;
 		int nextEndCol = 0;
-		if (stCol - testlength >= 0) {
+
+		//핵심
+
+		if (endCol - testlength >= 1) {
 			nextStCol = endCol - testlength;
 			nextEndCol = endCol;
 		}
-		else if (stCol - testlength < 0) {
+		else if (endCol - testlength < 1) {
+			//- 초과된 만큼  시작
+			//즉 무조건 1에서 시간
 			nextStCol = 1;
-			nextEndCol = nextStCol + testlength;
+			nextEndCol = 1 + testlength;
 		}
+
 		return { nextStRow, nextEndRow, nextStCol, nextEndCol };
 	}
 	else if ((endRow - stRow) < (endCol - stCol)) {
@@ -414,14 +378,18 @@ AtoE CrossPair(Pair findPair) {
 		int nextEndRow = 0;
 		int nextStCol = stCol;
 		int nextEndCol = endCol;
-		if (stRow - testlength >= 0) {
+
+		if (endRow - testlength >= 1) {
 			nextStRow = endRow - testlength;
 			nextEndRow = endRow;
 		}
-		else if (stRow - testlength < 0) {
+		else if (endRow - testlength < 1) {
+			//- 초과된 만큼  시작
+			//즉 무조건 1에서 시간
 			nextStRow = 1;
-			nextEndRow = nextStRow + testlength;
+			nextEndRow = 1 + testlength;
 		}
+
 
 		return { nextStRow, nextEndRow, nextStCol, nextEndCol };
 	}
@@ -437,6 +405,10 @@ AtoE subTurn(Pair findPair) {
 	//일단 대각선 성분인지 아닌지 판단해야함 
 	// 대각선 성분이면 꼭지점이여서 괜찮은데 아니면 늘려줘야함
 	//이새끼들은 좌상, 우하 반환하는 역활
+
+
+	//아래 CrossPair, notCrossPair2가 핵심 findClose에서 동일한 거리의 모든거 반환하고 그것하나하나 r,c(좌상)구해서 제일 r<c작은 값 선정
+	// 경우의 수 생각하기 복잡함
 	int crossT = selectCross(findPair);
 	AtoE doubPair = { 0 };
 	if (crossT == 1)doubPair = notCrossPair2(findPair); 
@@ -523,10 +495,10 @@ int main() {
 		//	for (int j = 1; j <= N; j++) {
 		//		cout << arr[i][j] << " ";
 		//	}
-		//	cout << "   ";
-		//	for (int j = 1; j <= N; j++) {
-		//		cout << vArr[i][j].TF << " ";
-		//	}
+		//	//cout << "   ";
+		//	//for (int j = 1; j <= N; j++) {
+		//	//	cout << vArr[i][j].TF << " ";
+		//	//}
 		//	cout << "\n";
 		//}
 		//cout << "========" << K << "  =============\n";
