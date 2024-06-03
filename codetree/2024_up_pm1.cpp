@@ -173,7 +173,6 @@ void getBfs(Pair nowPoi, int index) {
 	int flag = 0;
 	while (!q.empty()) {
 		Pindex now = q.front(); q.pop();
-		//Pair nowExit = indexMatchExit[index];
 
 		int nowIndex = now.index;
 		int nowMaxRow = indexMatchCenter[nowIndex] + 2;
@@ -185,20 +184,13 @@ void getBfs(Pair nowPoi, int index) {
 		for (int i = 0; i < 4; i++) {
 			int nextRow = now.row + Edr[i];
 			int nextCol = now.col + Edc[i];
-			if (arr[nextRow][nextCol] == 0 || arr[nextRow][nextCol] == nowIndex)continue;
+			if (nextRow < 0 || nextCol < 0 || nextRow >= R || nextCol >= C || arr[nextRow][nextCol] == 0 || arr[nextRow][nextCol] == nowIndex)continue;
 			int nextIndex = arr[nextRow][nextCol];
 			if (visited[nextIndex] == 1)continue;
+			visited[nextIndex] = 1;
 			Pair nextExit = indexMatchExit[nextIndex];
-			if (maxDp[nowIndex] != 0) {
-				if (maxDp[nowIndex] > maxValue) {
-					flag = 1;
-					maxValue = maxDp[nowIndex];
-				}
-				//cout << "\n dp사용" << nowIndex;
-			}
 			q.push({ nextExit.row, nextExit.col,nextIndex });
 		}
-		if (flag == 1)break;
 	}
 }
 
@@ -251,6 +243,7 @@ void startCol(int index) {
 			getBfs(nowExit,index);
 			maxDp[index] = maxValue;
 			for (int i = 0; i <= index; i++)visited[i] = 0;
+			//cout << "\n 지금 출구" << nowExit.row << "," << nowExit.col<<","<<exitDir;
 			//cout << "\n"<<"maxVlaue"<< maxValue <<"\n";
 			sumScore += maxValue;
 		}
