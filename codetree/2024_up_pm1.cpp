@@ -3,6 +3,7 @@
 using namespace std;
 
 // dp안쓰고 dfs쓰면 오져서 시간초과 bfs쓰면 큐에 존나 많이 담겨서 메모리 초과 되는듯
+// dp안써도됨 근데 dfs쓰면 안되고 bfs는 써도됨
 
 
 //struct map {int index, exitFlag;};
