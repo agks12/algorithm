@@ -1,0 +1,370 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<algorithm>
+using namespace std;
+
+// bfs로 타켓 찾지 말고 모든 타겟에 대해서 사각형 그려봐야함
+
+struct Node {
+	int dis, row, col,endRow,endCol;
+	bool operator<(Node right) const{
+		if (right.dis < dis)return true;
+		if (right.dis > dis)return false;
+		if (right.row < row)return true;
+		if (right.row > row)return false;
+		if (right.col < col)return true;
+		if (right.col > col)return false;
+		return false;
+	}
+};
+struct MAP { int block; vector<int> peoN; };
+struct DPair { int stRow, stCol, endRow, endCol; };
+struct Pair { int row, col; };
+int N, M, K;
+
+// 출구좌표
+int exitRow;
+int exitCol;
+
+// 탈출사람수
+int exitPeo;
+
+MAP map[11][11];
+Pair people[12];
+
+// 사람 이동시 4방향
+int dr[4] = { -1,1,0,0 };
+int dc[4] = { 0,0,-1,1 };
+
+// 출구 가가운거 선택 8방향
+//int drE[8] = {-1,-1,-1,0,0,1,1,1};
+//int dcE[8] = {-1,0,1,-1,1,-1,0,1};
+//
+//int drE[8] = { -1,-1,0,-1,0,1,1,1 };
+//int dcE[8] = { -1,0,-1,1,1,-1,0,1 };
+
+int drE[8] = { -1,-1,0,-1,1,0,1,1 };
+int dcE[8] = { -1,0,-1,1,-1,0,0,1 };
+
+// 이동거리 합
+int sumMove;
+
+int calDistane(Pair tarPoi) {
+	int dx = abs(tarPoi.row - exitRow);
+	int dy = abs(tarPoi.col - exitCol);
+	return (dx + dy);
+}
+
+void realMove(int nowN) {
+	Pair now = people[nowN];
+
+	int nowDis = calDistane(now);
+
+	Pair next = { -1,-1 };
+
+	for (int i = 0; i < 4; i++) {
+		int nextRow = now.row + dr[i];
+		int nextCol = now.col + dc[i];
+		if (nextRow <= 0 || nextCol <= 0 || nextRow > N || nextCol > N)continue;
+		if (map[nextRow][nextCol].block > 0)continue; // 벽있으면 못감
+		int dis = calDistane({ nextRow,nextCol });
+
+		if (dis < nowDis) { // 지금 거리보다 크고나 같으면 안움직임
+			nowDis = dis;
+			next.row = nextRow;
+			next.col = nextCol;
+		}
+	}
+	
+	if (next.row == -1 && next.col == -1)return; // 움직일대 없음
+	// 움직임
+	// 배열,맵 초기화
+	people[nowN].row = next.row;
+	people[nowN].col = next.col;
+	//find(map[now.row][now.col].peoN.begin(), map[now.row][now.col].peoN.end(), nowN);
+	map[now.row][now.col].peoN.erase(remove(map[now.row][now.col].peoN.begin(), map[now.row][now.col].peoN.end(),nowN), map[now.row][now.col].peoN.end());
+	sumMove++;
+	//cout << "\n" << sumMove << " 좌표" << now.row << now.col;
+	if (next.row == exitRow && next.col == exitCol) {// 탈출성공
+		exitPeo++;
+		//cout << "\n탈출성공"<<exitPeo<<"\n";
+		people[nowN].row = -1;
+		people[nowN].col = -1;
+		return;
+	}
+	map[next.row][next.col].peoN.push_back(nowN);
+
+}
+
+void moveStart() {
+	// 사람1명씩 이동
+	for (int i = 1; i <= M; i++) {
+		if (people[i].row == -1)continue;
+		realMove(i);
+	}
+}
+
+Pair selectClose() {
+	queue<Pair> q;
+	q.push({ exitRow,exitCol });
+	int visited[11][11] = { 0 };
+	visited[exitRow][exitCol] = 1;
+	while (!q.empty()) {
+		Pair now = q.front(); q.pop();
+		for (int i = 0; i < 8; i++) {
+			int nextRow = now.row + drE[i];
+			int nextCol = now.col + dcE[i];
+			if (nextRow <= 0 || nextCol <= 0 || nextRow > N || nextCol > N)continue;
+			if (visited[nextRow][nextCol] == 1)continue;
+			visited[nextRow][nextCol] = 1;
+			if (map[nextRow][nextCol].peoN.size() > 0) {
+				// 사람 찾음 바로리턴
+				return { nextRow,nextCol };
+			}
+			q.push({ nextRow,nextCol });
+		}
+	}
+}
+
+DPair findRat(Pair nowPoi) {
+	int dr = abs(nowPoi.row - exitRow);
+	int dc = abs(nowPoi.col - exitCol);
+
+	int maxDis = dr+1;
+	int minDis = dc+1;
+	if (dc > dr) {
+		maxDis = dc+1;
+		minDis = dr+1;
+	}
+
+	if (dr > dc) {
+		// 세로 위치
+		int stRow = nowPoi.row;
+		int endRow = exitRow;
+		if (stRow > endRow) {
+			stRow = exitRow;
+			endRow = nowPoi.row;
+		}
+
+
+		// 가로 늘려야 하는 경우
+		// 가로 시작위치 찾기
+		int stCol = nowPoi.col;
+		int endCol = exitCol;
+		if (stCol > endCol) {
+			stCol = exitCol;
+			endCol = nowPoi.col;
+		}
+
+		// 지금 minDis 인데 maxDis 될때 까지 해야함
+		while (minDis != maxDis) {
+			if (stCol - 1 > 0) {
+				// stCol -- 해도됨
+				stCol--;
+				minDis++;
+				continue;
+			}
+			if (stCol - 1 <= 0) {
+				// 이러면 end를 늘려야함
+				endCol++;
+				minDis++;
+			}
+		}
+		// 이거 끝나면 알아서 stCol, endCol정해짐
+		return { stRow,stCol,endRow,endCol };
+	}
+	else if (dr < dc) {
+		// 세로 늘려야 하는 경우
+
+		// 가로 위치 찾기
+		int stCol = nowPoi.col;
+		int endCol = exitCol;
+		if (stCol > endCol) {
+			stCol = exitCol;
+			endCol = nowPoi.col;
+		}
+
+		// 세로 위치
+		int stRow = nowPoi.row;
+		int endRow = exitRow;
+		if (stRow > endRow) {
+			stRow = exitRow;
+			endRow = nowPoi.row;
+		}
+
+		// 지금 minDis 인데 maxDis 될때 까지 해야함
+		while (minDis != maxDis) {
+			if (stRow - 1 > 0) {
+				// stCol -- 해도됨
+				stRow--;
+				minDis++;
+				continue;
+			}
+			if (stRow - 1 <= 0) {
+				// 이러면 end를 늘려야함
+				endRow++;
+				minDis++;
+			}
+		}
+		// 이거 끝나면 알아서 stCol, endCol정해짐
+		return { stRow,stCol,endRow,endCol };
+	}
+	else if(dr==dc){
+		// 가로 위치 찾기
+		int stCol = nowPoi.col;
+		int endCol = exitCol;
+		if (stCol > endCol) {
+			stCol = exitCol;
+			endCol = nowPoi.col;
+		}
+
+		// 세로 위치
+		int stRow = nowPoi.row;
+		int endRow = exitRow;
+		if (stRow > endRow) {
+			stRow = exitRow;
+			endRow = nowPoi.row;
+		}
+
+		return { stRow,stCol,endRow,endCol };
+
+	}
+
+}
+
+DPair chooseRat() {
+	// 일단 제일 가까운 rc우선순위로 참가자 1명 찾음
+	//Pair targetPoi = selectClose();
+	// 위 참가자위치로 시작 끝 정사각형 찾아야ㅕ함
+	// 근데 정사각형 안될 수 도 있을거 같은데
+	priority_queue<Node> pq;
+	for (int i = 1; i <= M; i++) {
+		if (people[i].row == -1)continue;
+		Pair now = people[i];
+		int dr = abs(now.row - exitRow);
+		int dc = abs(now.col - exitCol);
+
+		int maxDis = dr + 1;
+		int minDis = dc + 1;
+		if (dc > dr) {
+			maxDis = dc + 1;
+			minDis = dr + 1;
+		}
+
+		DPair ratc = findRat(now);
+		pq.push({ maxDis ,ratc.stRow,ratc.stCol,ratc.endRow,ratc.endCol });
+	}
+
+	Node firstClose = pq.top(); pq.pop();
+
+	return {firstClose.row, firstClose.col,firstClose.endRow,firstClose .endCol};
+}
+
+void rotate(DPair now) {
+	// 먼저 복사 배열 만들기
+
+	int stRow = now.stRow;
+	int stCol = now.stCol;
+	int endRow = now.endRow;
+	int endCol = now.endCol;
+
+	MAP copyMap[11][11] = { 0 };
+
+	for (int r = stRow; r <= endRow; r++) {
+		for (int c = stCol; c <= endCol; c++) {
+			if (map[r][c].block == 0) {
+				copyMap[r][c].block = map[r][c].block;
+			}
+			else if (map[r][c].block > 0) {
+				copyMap[r][c].block = map[r][c].block-1;
+			}
+			else if (map[r][c].block == -1) {
+				copyMap[r][c].block = map[r][c].block;
+			}
+			copyMap[r][c].peoN = map[r][c].peoN;
+		}
+	}
+
+	int ratdis = endRow - stRow + 1;
+
+	for (int i = 0; i < ratdis; i++) {
+		for (int j = 0; j < ratdis; j++) {
+			map[stRow + j][endCol - i] = copyMap[stRow + i][stCol + j];
+			if (copyMap[stRow + i][stCol + j].block == -1) {
+				// 출구 위치 갱신
+				exitRow = stRow + j;
+				exitCol = endCol - i;
+			}
+			if (copyMap[stRow + i][stCol + j].peoN.size() > 0) {
+				// 사람위치 갱신
+				for (int k = 0; k < copyMap[stRow + i][stCol + j].peoN.size(); k++) {
+					int nowN = copyMap[stRow + i][stCol + j].peoN[k];
+					people[nowN].row = stRow + j;
+					people[nowN].col = endCol - i;
+				}
+			}
+		}
+	}
+}
+
+int main() {
+	cin >> N >> M >> K;
+	for (int i = 1; i <= N; i++) {
+		for (int c = 1; c <= N; c++) {
+			cin >> 	map[i][c].block;
+		}
+	}
+	for (int i = 1; i <= M; i++) {
+		int r, c;
+		cin >> r >> c;
+		people[i].row = r;
+		people[i].col = c;
+		map[r][c].peoN.push_back(i); // 맵에 사람인덱스 추가
+	}
+	cin >> exitRow >> exitCol;
+	map[exitRow][exitCol].block = -1;
+
+	//for (int i = 1; i <= N; i++) {
+	//	for (int c = 1; c <= N; c++) {
+	//		if (map[i][c].peoN.size() > 0)cout << "p" << " ";
+	//		else cout << map[i][c].block << " ";
+	//	}
+	//	cout << "\n";
+	//}
+	//cout << "\n 시작전=========================\n\n\n\n\n\n\n";
+
+
+	for (int i = 1; i <= K; i++) {
+		moveStart();
+		if (exitPeo == M)break;
+		//cout << "\n";
+		//for (int i = 1; i <= N; i++) {
+		//	for (int c = 1; c <= N; c++) {
+		//		if (map[i][c].peoN.size() > 0)cout << "p" << " ";
+		//		else cout << map[i][c].block << " ";
+		//	}
+		//	cout << "\n";
+		//}
+		//cout << "\n 애들이동=========================\n\n\n";
+
+		DPair ratc = chooseRat();
+		rotate(ratc);
+		//cout << "지금턴 사각형" << ratc.stRow << " " << ratc.stCol << " " << ratc.endRow << " " << ratc.endCol << "\n";
+		//cout << " 지금 출구 좌표" << exitRow << "," << exitCol<<"\n";
+		//for (int i = 1; i <= N; i++) {
+		//	for (int c = 1; c <= N; c++) {
+		//		if (map[i][c].peoN.size() > 0)cout << "p" << " ";
+		//		else cout << map[i][c].block << " ";
+		//	}
+		//	cout << "\n";
+		//}
+		//cout << "\n 한턴 끝=========================\n\n\n";
+
+	}
+
+	cout << sumMove<<"\n";
+	cout << exitRow << " " << exitCol;
+
+	return 0;
+}
