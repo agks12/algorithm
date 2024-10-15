@@ -79,7 +79,7 @@ int main() {
 	return 0;
 }
 
-// 벡터로 경로추적해서 경로 길이 계산하는데 왜 틀리지?
+// 벡터로 경로추적해서 경로 길이 계산하는데 왜 틀리지? => 위에는 pq에서 같이 해서 똑같은거 뽑는데 아래는 pq랑 그냥 q랑 뽑는 순서 바꿔져서 이상해짐
 //#include<iostream>
 //#include<queue>
 //#include<vector>
